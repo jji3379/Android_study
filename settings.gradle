@@ -1,0 +1,12 @@
+include ':step08customadapter'
+include ':step07example'
+include ':step07listview'
+include ':step06example'
+include ':step06listener'
+include ':step05activitylifecycle'
+include ':step04activitymove'
+include ':step03view'
+include ':step02layout'
+include ':step01activity'
+include ':app'
+rootProject.name = "Hello"
