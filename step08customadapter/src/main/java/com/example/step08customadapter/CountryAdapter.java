@@ -1,9 +1,13 @@
 package com.example.step08customadapter;
 
 import android.content.Context;
+import android.util.Log;
+import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.BaseAdapter;
+import android.widget.ImageView;
+import android.widget.TextView;
 
 import java.util.List;
 
@@ -48,7 +52,27 @@ public class CountryAdapter extends BaseAdapter {
     //인자로 전달된 position 에 해당하는 cell view 를 만들어서 리턴한거나
     //이미 만들어진 cell view 의 내용만 만들어서 리턴해 준다.
     @Override
-    public View getView(int position, View convertView, ViewGroup parent) {
-        return null;
+    public View getView(int position, View view, ViewGroup parent) {
+        Log.e("CountryAdapter","getView() 호출됨 position:"+position);
+        //1. res/layout/listview_cell.xml 문서를 전개해서 View 객체를 만든다.
+
+        if(view==null){
+            Log.e("CountryAdapter","view가 null 이여서 cell view 를 새로 만듭니다.");
+            //레이아웃 전개자( 레이아웃 xml 문서를 이용해서 View 를 만드는객체 ) 객체의 참조값 얻어오기
+            LayoutInflater inflater=LayoutInflater.from(context);
+            //listview_cell.xml 문서를 전개해서 새로운 View 를 만든다.
+            view=inflater.inflate(R.layout.listview_cell,parent,false);
+        }
+        //2. position 에 해당하는 CountryDto 객체의 참조값을 얻어온다.
+        CountryDto dto=list.get(position);
+        //3. 만든 View 객체 안에 있는 ImageView, TextView 의 참조값을 얻어온다.
+        ImageView imageView=view.findViewById(R.id.imageView);
+        TextView textView=view.findViewById(R.id.textView);
+        //4. ImageView, TextView 에 정보를 출력한다.
+        imageView.setImageResource(dto.getResId());
+        textView.setText(dto.getName());
+        //5. View 객체를 리턴해 준다.
+
+        return view;
     }
 }
