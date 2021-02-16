@@ -1,3 +1,4 @@
+include ':step09fragment'
 include ':step08customadapter'
 include ':step07example'
 include ':step07listview'
