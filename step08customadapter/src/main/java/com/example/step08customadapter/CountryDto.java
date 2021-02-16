@@ -1,6 +1,8 @@
 package com.example.step08customadapter;
 
-public class CountryDto {
+import java.io.Serializable;
+
+public class CountryDto implements Serializable { //Intent 객체에 담기 위해
     //필드
     private int resId; //출력할 이미지 리소스 아이디 R.id.austria 등등의 값
     private String name; //나라의 이름
