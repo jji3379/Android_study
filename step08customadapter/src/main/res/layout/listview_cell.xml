@@ -6,12 +6,14 @@
     android:gravity="center_vertical">
 
     <ImageView
-        android:layout_width="200dp"
-        android:layout_height="200dp"
-        app:srcCompat="@drawable/austria" />
+        android:layout_width="100dp"
+        android:layout_height="100dp"
+        app:srcCompat="@drawable/austria"
+        android:id="@+id/imageView"/>
     <TextView
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:text="오스트리아"
-        android:textSize="40sp"/>
+        android:textSize="20sp"
+        android:id="@+id/textView"/>
 </LinearLayout>
