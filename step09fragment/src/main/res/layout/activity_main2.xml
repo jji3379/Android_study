@@ -7,24 +7,23 @@
     tools:context=".MainActivity"
     android:orientation="vertical">
 
+    <TextView
+        android:layout_width="match_parent"
+        android:layout_height="100dp"
+        android:gravity="center_horizontal"
+        android:textSize="20sp"
+        android:background="#cccccc"
+        android:id="@+id/textConsole"/>
 
     <fragment
-        android:id="@+id/fragment"
+        android:id="@+id/guraFragment"
         android:name="com.example.step09fragment.GuraFragment"
         android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:layout_margin="10dp"/>
-
-    <fragment
-        android:id="@+id/fragment5"
-        android:name="com.example.step09fragment.GuraFragment"
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:layout_margin="10dp"/>
+        android:layout_height="wrap_content" />
 
     <Button
-        android:id="@+id/button"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:text="Activity's Button" />
+        android:text="리셋"
+        android:id="@+id/resetBtn"/>
 </LinearLayout>
