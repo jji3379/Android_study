@@ -37,5 +37,8 @@ public class MainActivity2 extends AppCompatActivity
         //원래 type 으로 casting
         GuraFragment gf=(GuraFragment)f;
         gf.reset();
+
+        //GuraFragment 객체의 참조값을 얻어오는 작업은 1줄로 줄이면...
+        GuraFragment gf2=(GuraFragment)getSupportFragmentManager().findFragmentById(R.id.guraFragment);
     }
 }
