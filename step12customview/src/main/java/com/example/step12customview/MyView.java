@@ -1,8 +1,11 @@
 package com.example.step12customview;
 
 import android.content.Context;
+import android.graphics.Bitmap;
+import android.graphics.BitmapFactory;
 import android.graphics.Canvas;
 import android.graphics.Color;
+import android.graphics.Paint;
 import android.util.AttributeSet;
 import android.view.MotionEvent;
 import android.view.View;
@@ -19,7 +22,7 @@ public class MyView extends View {
     public MyView(Context context) {
         super(context);
     }
-    //생성자2
+    //생성자2(layout xml 문서에서 사용하면 아래의 생성자가 호출된다)
     public MyView(Context context, @Nullable AttributeSet attrs) {
         super(context, attrs);
     }
@@ -28,6 +31,19 @@ public class MyView extends View {
     protected void onDraw(Canvas canvas) {
         //Canvas 객체를 이용해서 원하는 작업을 한다.
         canvas.drawColor(colors[index]);
+        //BitmapFactory 클래스의 static 메소드를 이용해서 이미지 로딩해서
+        //Bitmap type 으로 만들기
+        Bitmap image=BitmapFactory.decodeResource(getResources(),R.drawable.austria);
+        //Bitmap 의 크기를 변환하기
+        Bitmap scaledImage=Bitmap.createScaledBitmap(image,100,100,false);
+        //Canvas 객체를 이용해서 이미지의 좌상단의 좌표를 지정하고 그린다.
+        canvas.drawBitmap(scaledImage,0,0,null);
+        //글자를 출력하기 위한 Point 객체
+        Paint textP=new Paint();
+        textP.setColor(Color.YELLOW);
+        textP.setTextSize(100);
+        //Canvas 객체를 이용해서 글자의 좌하단의 좌표를 지정하고 그린다.
+        canvas.drawText("안녕",100,100,textP);
     }
     //View 에 터치 이벤트가 발생했을때 호출되는 메소드
     @Override
