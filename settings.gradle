@@ -1,3 +1,4 @@
+include ':step12gameview'
 include ':step12customview'
 include ':step11bottomnavi'
 include ':step10viewpager2'
