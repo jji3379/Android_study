@@ -23,7 +23,7 @@ public class GameView extends View {
     int width, height; //view 의 폭과 높이
     int back1Y, back2Y;
     //드래곤의 이미지를 저장할 배열
-    Bitmap[] dragonImgs=new Bitmap[2];
+    Bitmap[] dragonImgs=new Bitmap[4];
     //드래곤 이미지 인덱스
     int dragonIndex=0;
     //유닛(드래곤, 적기) 의 크기를 저장할 필드
@@ -39,7 +39,7 @@ public class GameView extends View {
     //미사일 이미지를 담을 배열
     Bitmap[] missImgs=new Bitmap[3];
     //적기 이미지를 저장할 배열
-    Bitmap[] enemyImgs=new Bitmap[2];
+    Bitmap[][] enemyImgs= new Bitmap[2][2];
     //Enemy 객체를 저장할 List
     List<Enemy> enemyList=new ArrayList<>();
     //적기의 x 좌표를 저장할 배열
@@ -48,7 +48,12 @@ public class GameView extends View {
     Random ran=new Random();
     //드래곤이 죽었는지 여부
     boolean isDragonDie=false;
-
+    //SoundManager 객체를 저장할 필드
+    SoundManager sManager;
+    //적기의 속도를 저장할 필드
+    int speedEnemy;
+    //미사일의 속도를 저장할 필드
+    int speedMissile;
     public GameView(Context context) {
         super(context);
     }
@@ -56,6 +61,12 @@ public class GameView extends View {
     public GameView(Context context, @Nullable AttributeSet attrs) {
         super(context, attrs);
     }
+
+    //SoundManager 객체를 필드에 저장하는 setter 메소
+    public void setsManager(SoundManager sManager) {
+        this.sManager = sManager;
+    }
+
     //초기화 메소드
     public void init(){
         //필요한 이미지 로딩해서 준비해 놓기
@@ -69,12 +80,18 @@ public class GameView extends View {
                 BitmapFactory.decodeResource(getResources(), R.drawable.unit1);
         Bitmap dragonImg2=
                 BitmapFactory.decodeResource(getResources(), R.drawable.unit2);
+        Bitmap dragonImg3=
+                BitmapFactory.decodeResource(getResources(), R.drawable.unit3);
         dragonImg1=Bitmap
                 .createScaledBitmap(dragonImg1, unitSize, unitSize, false);
         dragonImg2=Bitmap
                 .createScaledBitmap(dragonImg2, unitSize, unitSize, false);
+        dragonImg3=Bitmap
+                .createScaledBitmap(dragonImg3, unitSize, unitSize, false);
         dragonImgs[0]=dragonImg1;
         dragonImgs[1]=dragonImg2;
+        dragonImgs[2]=dragonImg3;
+        dragonImgs[3]=dragonImg2;
         //미사일 이미지 로딩
         Bitmap missImg1=BitmapFactory.decodeResource(getResources(),
                 R.drawable.mi1);
@@ -95,18 +112,28 @@ public class GameView extends View {
         missImgs[2]=missImg3;
         //적기 이미지 로딩
         Bitmap enemyImg1=BitmapFactory
-                .decodeResource(getResources(), R.drawable.juck1);
+                .decodeResource(getResources(), R.drawable.silver1);
         Bitmap enemyImg2=BitmapFactory
-                .decodeResource(getResources(), R.drawable.juck2);
+                .decodeResource(getResources(), R.drawable.silver2);
+        Bitmap enemyImg3=BitmapFactory
+                .decodeResource(getResources(), R.drawable.gold1);
+        Bitmap enemyImg4=BitmapFactory
+                .decodeResource(getResources(), R.drawable.gold2);
         //적기 이미지 사이즈 조절
         enemyImg1=Bitmap.createScaledBitmap(enemyImg1,
                 unitSize, unitSize, false);
         enemyImg2=Bitmap.createScaledBitmap(enemyImg2,
                 unitSize, unitSize, false);
+        enemyImg3=Bitmap.createScaledBitmap(enemyImg3,
+                unitSize, unitSize, false);
+        enemyImg4=Bitmap.createScaledBitmap(enemyImg4,
+                unitSize, unitSize, false);
         //적기 이미지 배열에 저장
-        enemyImgs[0]=enemyImg1;
-        enemyImgs[1]=enemyImg2;
-        //적기의 x 좌표를 배열에 저장한다.
+        enemyImgs[0][0]=enemyImg1; //0행 0열 silver1
+        enemyImgs[0][1]=enemyImg2; //0행 1열 silver2
+        enemyImgs[1][0]=enemyImg3; //1행 0열 gold1
+        enemyImgs[1][1]=enemyImg4; //1행 1열 gold2
+       //적기의 x 좌표를 배열에 저장한다.
         for(int i=0; i<5; i++){
             enemyX[i] = i*unitSize + unitSize/2;
         }
@@ -131,6 +158,10 @@ public class GameView extends View {
         dragonY=height-unitSize/2;
         //미사일의 크기
         missSize=unitSize/4;
+        //적기의 속도 부여
+        speedEnemy=h/50;
+        //미사일의 속도 부여
+        speedMissile=h/50;
 
         //초기화 메소드 호출
         init();
@@ -153,10 +184,10 @@ public class GameView extends View {
         }
         //카운트를 증가시키고
         count++;
-        if(count%10 == 0){
+        if(count%5 == 0){
             //드래곤 애니메이션 효과를 주기위해
             dragonIndex++;
-            if(dragonIndex==2){//만일 없는 인덱스라면
+            if(dragonIndex==4){//만일 없는 인덱스라면
                 dragonIndex=0;//다시 처음으로
             }
         }
@@ -170,6 +201,7 @@ public class GameView extends View {
         makeEnemy();
         moveEnemy();
         checkEnemy();
+        enemyAnimation();
         //적기와 미사일의 충돌 검사
         checkStrike();
         //드래곤의 충돌검사
@@ -180,10 +212,28 @@ public class GameView extends View {
         canvas.drawBitmap(backImg, 0, back2Y, null);
         //반복문 돌면서 적기 그리기
         for(Enemy tmp:enemyList){
-            canvas.drawBitmap(enemyImgs[tmp.type],
-                    tmp.x-unitSize/2,
-                    tmp.y-unitSize/2,
-                    null);
+            if(tmp.isFall){//추락하는 중일 때
+                //canvas 에 어떤 변화도 가하지 않은 초기 상태를 저장하고
+                canvas.save();
+                //적기가 죽은 위치로 평행이동
+                canvas.translate(tmp.x,tmp.y);
+                //그 위치에서 좌표계를 회전
+                canvas.rotate(tmp.angle);
+                //좀더 줄어든 크기의 Bitmap 이미지를 얻어내서
+                Bitmap scaled=Bitmap.createScaledBitmap(enemyImgs[tmp.type][tmp.imageIndex],tmp.size,tmp.size,false);
+                //적기를 원점에 그린다.
+                canvas.drawBitmap(enemyImgs[tmp.type][tmp.imageIndex],
+                        50-unitSize/2,
+                        50-unitSize/2,
+                        null);
+                //canvas 를 위에서 저장된 상태로 다시 복구 시킨다.
+                canvas.restore();
+            }else{//추락중이 아닐
+                canvas.drawBitmap(enemyImgs[tmp.type][tmp.imageIndex],
+                        tmp.x-unitSize/2,
+                        tmp.y-unitSize/2,
+                        null);
+            }
         }
 
         //반복문 돌면서 미사일 그리기
@@ -191,11 +241,25 @@ public class GameView extends View {
             canvas.drawBitmap(missImgs[1],
                     tmp.x-missSize/2, tmp.y-missSize/2, null);
         }
-
         //드래곤 이미지 그리기
         canvas.drawBitmap(dragonImgs[dragonIndex], dragonX-unitSize/2,
                 dragonY-unitSize/2, null);
     }
+
+    //적기 애니메이션
+    public void enemyAnimation(){
+        if(count%10 !=0){
+            return;
+        }
+        for(Enemy tmp:enemyList){
+            //적기의 이미지 인덱스를 1 증가 시킨다.
+            tmp.imageIndex++;
+            if(tmp.imageIndex==2){ //만일 존재하지 안흔 인덱스라면
+                tmp.imageIndex=0;//다시 처음으로 설정
+            }
+        }
+    }
+
     //드래곤과 적기의 충돌검사
     public void checkDie(){
         for(Enemy tmp:enemyList){
@@ -206,6 +270,8 @@ public class GameView extends View {
             double distance=Math.sqrt(powX+powY);
             if (distance < unitSize/2) {
                 isDragonDie=true;
+                //드래곤이 죽는 효과음 재생
+                sManager.playSound(GameActivity.SOUND_BIRDDIE);
             }
         }
     }
@@ -223,15 +289,17 @@ public class GameView extends View {
                         m.x < e.x + unitSize/2 &&
                         m.y > e.y - unitSize/2 &&
                         m.y < e.y + unitSize/2;
-                if(isStrike){
+                if(isStrike && !e.isFall){
                     //적기 에너지를 줄이고
                     e.energy -= 50;
                     //미사일을 없앤다
                     m.isDead=true;
-                    //적기의 에너지가 0 이하면 적기도 제거 되도록
+                    //적기의 에너지가 0 이하면 적기가 추락 하도록
                     if(e.energy <= 0){
-                        e.isDead=true;
+                        e.isFall=true;
                     }
+                    //적기가 미사일에 맞았다는 효과음을 재생한다.
+                    sManager.playSound(GameActivity.SOUND_SHOOT);
                 }
             }
         }
@@ -250,21 +318,35 @@ public class GameView extends View {
             //적기의 종류도 랜덤하게 0~1 사이의 랜덤한 수 얻어내기
             int type=ran.nextInt(2);
             if(type==0){
-                Enemy e=new Enemy(enemyX[i], -unitSize/2, type, 50);
+                Enemy e=new Enemy(enemyX[i], -unitSize/2, type, 50,unitSize);
                 enemyList.add(e);
             }else if(type==1){
-                Enemy e=new Enemy(enemyX[i], -unitSize/2, type, 100);
+                Enemy e=new Enemy(enemyX[i], -unitSize/2, type, 100,unitSize);
                 enemyList.add(e);
             }
         }
     }
     public void moveEnemy(){
         for(Enemy tmp:enemyList){
-            tmp.y += 10;
+            //적기가 추락하는 상태라면
+            if(tmp.isFall){
+                //크기를 줄이고
+                tmp.size -= 1;
+                //회전값을 증가 시킨다.
+                tmp.angle += 10;
+                //만일 크기가 0보다 작아진다면
+                if(tmp.size <= 0){
+                    //배열에서 제거될 수 있도록 표시한다.
+                    tmp.isDead=true;
+                }
+            }else{//추락하는 상태가 아니라면 움직이기
+                tmp.y += speedEnemy;
+            }
             //적기가 화면 아래쪽으로 벗어나면
             if(tmp.y >= height+unitSize/2){
                 tmp.isDead=true;//배열에서 제거 될수 있도록 표시한다.
             }
+
         }
     }
     public void checkEnemy(){
@@ -293,7 +375,7 @@ public class GameView extends View {
     public void moveMissile(){
         for(Missile tmp:missList){
             //미사일의 y 좌표를 감소 시켜서 앞으로 전진하게 하고
-            tmp.y -= 20;
+            tmp.y -= speedMissile;
             //만일 화면을 벗어난 미사일 이라면 제거하도록 표시한다.
             if(tmp.y <= -missSize/2){
                 tmp.isDead=true;
@@ -310,6 +392,8 @@ public class GameView extends View {
         Missile m=new Missile(dragonX, dragonY);
         //미사일 객체를 List 에 저장하기
         missList.add(m);
+        //미사일 발사 되는 효과음 재생하기
+        sManager.playSound(GameActivity.SOUND_LAZER);
     }
 
     //View 에 터치 이벤트가 발생하면 호출되는 메소드

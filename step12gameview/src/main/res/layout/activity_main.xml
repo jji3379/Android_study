@@ -15,5 +15,4 @@
         android:text="Game Start"
         android:id="@+id/startBtn"/>
 
-
 </LinearLayout>
