@@ -1,3 +1,6 @@
+include ':step15sqlite'
+include ':step14sharedpref'
+include ':step13broadcastreceiver'
 include ':step12gameview'
 include ':step12customview'
 include ':step11bottomnavi'
