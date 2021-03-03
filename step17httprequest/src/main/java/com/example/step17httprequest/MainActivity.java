@@ -12,6 +12,7 @@ import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
 
+import java.util.HashMap;
 import java.util.Map;
 
 public class MainActivity extends AppCompatActivity
@@ -37,6 +38,29 @@ public class MainActivity extends AppCompatActivity
             public void onClick(View v) {
                 String url="http://172.30.1.46:8888/AndroidServer/info2.jsp";
                 Util.sendGetRequest(2, url, null, MainActivity.this);
+            }
+        });
+        //요청하기3
+        Button requestBtn3=findViewById(R.id.requestBtn3);
+        requestBtn3.setOnClickListener(new View.OnClickListener(){
+            @Override
+            public void onClick(View v) {
+                String url="http://172.30.1.46:8888/AndroidServer/info3.jsp";
+                Util.sendGetRequest(3, url, null, MainActivity.this);
+            }
+        });
+        Button sendBtn=findViewById(R.id.sendBtn);
+        sendBtn.setOnClickListener(new View.OnClickListener(){
+            @Override
+            public void onClick(View v) {
+                //입력한 문자열 얻어오기
+                EditText inputMsg=findViewById(R.id.inputMsg);
+                String msg=inputMsg.getText().toString();
+                //전송할 문자열을 Map 에 msg 라는 키값으로 담는다.
+                Map<String, String> map=new HashMap<>();
+                map.put("msg",msg);
+                String url="http://172.30.1.46:8888/AndroidServer/send.jsp";
+                Util.sendGetRequest(4, url, map, MainActivity.this);
             }
         });
     }
@@ -86,6 +110,27 @@ public class MainActivity extends AppCompatActivity
                 }catch(JSONException e){
                     e.printStackTrace();
                 }
+                break;
+            case 3 :
+                try {
+                    //data 는 [ {},{},{} ] 형식의 문자열이다. (JSONArray 안에 JSONObject 가 있는 구조)
+                    JSONArray arr=new JSONArray(data);
+                    console.setText("");
+                    for(int i=0; i<arr.length(); i++){
+                        // i번째 JSONObject 참조
+                        JSONObject obj=arr.getJSONObject(i);
+                        int num=obj.getInt("num");
+                        String name=obj.getString("name");
+                        boolean isMan=obj.getBoolean("isMan");
+                        console.append("번호 : "+num+" 이름 : "+name+" 남자인지 여부 : "+isMan+"\n");
+                    }
+                }catch (JSONException e){
+                    e.printStackTrace();
+                }
+                break;
+            case 4:
+                //data 는 HTML 형식임으로 그냥 EditText 에 출력해 보세요
+                console.setText(data);
                 break;
         }
 
