@@ -1,3 +1,4 @@
+include ':step17example'
 include ':step17httprequest'
 include ':step16asynctask'
 include ':step15sqlite'
