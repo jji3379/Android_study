@@ -5,6 +5,8 @@ import android.os.Bundle;
 import android.view.View;
 import android.widget.AdapterView;
 import android.widget.ArrayAdapter;
+import android.widget.Button;
+import android.widget.EditText;
 import android.widget.ListView;
 
 import androidx.appcompat.app.AppCompatActivity;
@@ -23,6 +25,13 @@ public class MainActivity extends AppCompatActivity implements Util.RequestListe
     List<String> list;
     ArrayAdapter<String> adapter;
     JSONArray arr;
+    //정수 상수 정의하
+    public static final int REQUEST_LIST=1;
+    public static final int REQUEST_DETAIL=2;
+    public static final int REQUEST_INSERT=3;
+    //EditText 의 참조값을 필드에 저장하기 위
+    EditText input_name, input_addr;
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -39,6 +48,28 @@ public class MainActivity extends AppCompatActivity implements Util.RequestListe
         listView.setAdapter(adapter);
         //ListView 에 아이템 클릭 리스너 등록
         listView.setOnItemClickListener(this);
+        //EditText 의 참조값
+        input_name=findViewById(R.id.edit_name);
+        input_addr=findViewById(R.id.edit_addr);
+        //Button 의 참조값
+        Button addBtn=findViewById(R.id.addBtn);
+        //Button 에 리스너 등록하기
+        addBtn.setOnClickListener(new View.OnClickListener(){
+            @Override
+            public void onClick(View v) {
+                //입력한 이름과 주소 읽어오기
+                String name=input_name.getText().toString();
+                String addr=input_addr.getText().toString();
+                //서버에 전송하기 위해 Map 에 담기
+                Map<String, String> map=new HashMap<>();
+                map.put("name", name);
+                map.put("addr", addr);
+                //요청 url
+                String url="http://172.30.1.46:8888/spring04/api/member/insert.do";
+                //Util 을 이용해서 post 방식으로 전송
+                Util.sendPostRequest(REQUEST_INSERT, url, map, MainActivity.this);
+            }
+        });
     }
 
     @Override
@@ -46,7 +77,7 @@ public class MainActivity extends AppCompatActivity implements Util.RequestListe
         super.onStart();
         //ListView 에 출력할 데이터를 서버로 부터 요청을 한다.
         String url="http://172.30.1.46:8888/spring04/api/member/list.do";
-        Util.sendGetRequest(1,url,null,this);
+        Util.sendGetRequest(REQUEST_LIST,url,null,this);
     }
 
     @Override
@@ -55,7 +86,20 @@ public class MainActivity extends AppCompatActivity implements Util.RequestListe
         String data=(String)result.get("data");
 
         switch (requestId){
-            case 1:
+            case REQUEST_INSERT:
+                //추가하고 난후에 어떤 작업을 해야할까?
+                String url="http://172.30.1.46:8888/spring04/api/member/list.do";
+                Util.sendGetRequest(REQUEST_LIST,url,null,this);
+                //입력창 초기화
+                input_name.setText("");
+                input_addr.setText("");
+                //키보드 숨기기
+                Util.hideKeyboard(this);
+                //포커스 뺏기
+                Util.releaseFocus(input_name);
+                Util.releaseFocus(input_addr);
+                break;
+            case REQUEST_LIST:
                 //data 는 [ {},{},{},... ] 형식의 JSON 문자열이다.
                 try {
                     //List 에 있는 내용을 일단 모두 삭제하고

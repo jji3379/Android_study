@@ -1,6 +1,12 @@
 package com.example.step17example;
 
+import android.app.Activity;
+import android.content.Context;
 import android.os.AsyncTask;
+import android.view.View;
+import android.view.ViewGroup;
+import android.view.ViewParent;
+import android.view.inputmethod.InputMethodManager;
 
 import java.io.BufferedReader;
 import java.io.InputStreamReader;
@@ -27,6 +33,32 @@ public class Util {
             "code" 라는 키값으로 200, 404, 500, -1 중에 하나가 리턴되고
              -1 이 리턴되면 Exception 발생으로 실패이다. onFail() 호출
      */
+    //키보드 숨기는 메소드
+    public static void hideKeyboard(Activity activity){
+
+        InputMethodManager iManager=(InputMethodManager)
+                activity.getSystemService(Context.INPUT_METHOD_SERVICE);
+        if(activity.getCurrentFocus()==null)return;
+        iManager.hideSoftInputFromWindow(activity.getCurrentFocus().getWindowToken(), 0);
+    }
+    //메소드의 인자로 전달되는 View 객체의 포커스 해제하는 메소드
+    public static void releaseFocus(View view) {
+        ViewParent parent = view.getParent();
+        ViewGroup group = null;
+        View child = null;
+        while (parent != null) {
+            if (parent instanceof ViewGroup) {
+                group = (ViewGroup) parent;
+                for (int i = 0; i < group.getChildCount(); i++) {
+                    child = group.getChildAt(i);
+                    if(child != view && child.isFocusable())
+                        child.requestFocus();
+                }
+            }
+            parent = parent.getParent();
+        }
+    }
+
     public static void sendGetRequest(int requestId, String requestUrl, Map<String,String> params, RequestListener listener){
         RequestTask task=new RequestTask();
         task.setRequestId(requestId);
