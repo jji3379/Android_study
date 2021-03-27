@@ -1,3 +1,4 @@
+include ':step20contentprovider'
 include ':step18googlemap'
 include ':step17example'
 include ':step17httprequest'
